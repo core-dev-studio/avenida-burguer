@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVENIDA BURGUER | Oficial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #C5A059; --card-bg: rgba(15, 15, 15, 0.95); --border: rgba(197, 160, 89, 0.3); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('fundo.jpg.png');
+            background-size: cover; background-attachment: fixed; background-position: center;
+            color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden;
+        }
+
+        header { 
+            height: 45vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background: rgba(0,0,0,0.2); 
+            text-align: center;
+        }
+
+        .brand-name {
+            font-family: 'Oswald', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 15px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(197, 160, 89, 0.6);
+            border: 4px solid var(--gold);
+            padding: 20px 40px;
+            background: rgba(0,0,0,0.4);
+        }
+
+        nav { position: sticky; top: 0; background: #000; z-index: 1000; border-bottom: 1px solid var(--gold); }
+        .nav-content { display: flex; overflow-x: auto; padding: 15px; gap: 20px; justify-content: center; scrollbar-width: none; }
+        .nav-link { color: #888; text-decoration: none; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; white-space: nowrap; }
+        .nav-link:hover { color: var(--gold); }
+        
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px 20px 120px; }
+        .cat-banner { margin: 50px 0 25px; height: 140px; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; border: 1px solid var(--border); position: relative; }
+        .cat-banner h2 { position: relative; z-index: 2; font-family: 'Oswald', sans-serif; font-size: 2rem; letter-spacing: 5px; text-transform: uppercase; }
+        .cat-banner::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); padding: 15px; border-radius: 4px; display: flex; flex-direction: column; transition: 0.3s; }
+        .card-top { display: flex; align-items: center; margin-bottom: 12px; }
+        .item-img { width: 75px; height: 75px; background-size: cover; background-position: center; border-radius: 4px; margin-right: 12px; border: 1px solid #333; flex-shrink: 0; }
+        .item-info h3 { font-family: 'Oswald', sans-serif; font-size: 1rem; text-transform: uppercase; color: #fff; }
+        .item-info p { font-size: 0.7rem; color: #aaa; line-height: 1.3; }
+        
+        .card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #222; }
+        .price { font-family: 'Oswald', sans-serif; color: var(--gold); font-weight: 700; }
+        .qty-control { display: flex; align-items: center; gap: 8px; background: #222; border-radius: 4px; padding: 2px 8px; border: 1px solid var(--gold); }
+        .qty-btn { background: none; border: none; color: var(--gold); font-size: 1.1rem; cursor: pointer; font-weight: bold; }
+        .qty-num { font-family: 'Oswald', sans-serif; min-width: 15px; text-align: center; font-size: 0.8rem; color: #fff; }
+        .btn-add { background: transparent; color: var(--gold); border: 1px solid var(--gold); padding: 8px 15px; font-family: 'Oswald', sans-serif; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; }
+        
+        .cart-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--gold); padding: 15px 40px; display: none; border-radius: 50px; z-index: 2000; cursor: pointer; }
+        .cart-bar span { font-family: 'Oswald', sans-serif; font-weight: 700; color: #000; text-transform: uppercase; }
+
+        @media (max-width: 600px) {
+            .brand-name { font-size: 1.8rem; letter-spacing: 8px; padding: 15px 20px; }
+            header { height: 35vh; }
+        }
+    </style>
+</head>
+<body>
+
+<header><div class="brand-name">Avenida Burguer</div></header>
+<nav><div class="nav-content" id="nav-target"></div></nav>
+<main class="container" id="menu-target"></main>
+<div class="cart-bar" id="cart-bar" onclick="sendWhatsApp()"><span>FINALIZAR PEDIDO (<span id="cart-count">0</span>)</span></div>
+
+<script>
+    let cart = [];
+    const menuData = [
+        { cat: "Gourmet Artesanal", img: "gourmet.jpg.jpg", items: [
+            { id: "01", n: "Burg Tradicional", d: "Pão gergelim, artesanal 120g, mussarela, salada, cebola caramelizada e molho.", p: "25,00" },
+            { id: "02", n: "Burg Picanha", d: "Pão gergelim, picanha 120g, queijo prato, salada e molho.", p: "32,00" },
+            { id: "03", n: "Burg Cupim", d: "Pão gergelim, cupim 120g, queijo prato, salada e molho.", p: "30,00" },
+            { id: "04", n: "Burg Carneiro", d: "Pão gergelim, carneiro 120g, queijo prato e salada.", p: "34,00" },
+            { id: "05", n: "Burg Suíno", d: "Pão gergelim, porco 120g, bacon, queijo prato e salada.", p: "28,00" },
+            { id: "06", n: "Burg Frango Catupiry", d: "Pão gergelim, frango 120g, catupiry e queijo.", p: "26,00" },
+            { id: "07", n: "Burg Nordestino", d: "Pão gergelim, carne do sol 120g, queijo coalho e banana.", p: "34,00" },
+            { id: "08", n: "Burg Port Cheddar", d: "Pão gergelim, artesanal 120g, cheddar e cebola caramelizada.", p: "30,00" },
+            { id: "09", n: "Burg Costelinha", d: "Pão gergelim, costela boi 120g, queijo prato e salada.", p: "32,00" },
+            { id: "10", n: "Burg Big", d: "Pão gergelim, 2x artesanal 120g, bacon e duplo queijo.", p: "42,00" }
+        ]},
+        { cat: "Novidades", img: "novidades.jpg.jpg", items: [
+            { id: "11", n: "Picanha Cheddar 120g", d: "Pão gergelim, picanha, bacon e creme cheddar.", p: "35,00" },
+            { id: "12", n: "Picanha Cheddar 180g", d: "Pão gergelim, picanha 180g, bacon e extra cheddar.", p: "45,00" },
+            { id: "13", n: "Costelinha BBQ 120g", d: "Pão gergelim, costela bovina e barbecue artesanal.", p: "32,00" },
+            { id: "14", n: "Costelinha BBQ 180g", d: "Pão gergelim, costela bovina 180g e barbecue.", p: "40,00" },
+            { id: "15", n: "Burg Frango com Bacon", d: "Pão gergelim, filé frango e bacon fatias.", p: "28,00" }
+        ]},
+        { cat: "Combos", img: "combo.jpg.png.png", items: [
+            { id: "C1", n: "Combo Tradicional", d: "Burg Tradicional + Batata + Refri Lata.", p: "45,00" },
+            { id: "C2", n: "Combo Picanha", d: "Burg Picanha + Batata + Refri Lata.", p: "52,00" },
+            { id: "C3", n: "Combo Cupim", d: "Burg Cupim + Batata + Refri Lata.", p: "50,00" },
+            { id: "C7", n: "Combo Nordestino", d: "Burg Nordestino + Batata + Refri Lata.", p: "54,00" }
+        ]},
+        { cat: "Batatas", img: "batata.jpg.png.jpg", items: [
+            { id: "16", n: "Batata Frita", d: "Porção de batata crocante.", p: "20,00" },
+            { id: "17", n: "Meia Batata", d: "Porção individual.", p: "12,00" },
+            { id: "18", n: "Batata Cheddar e Bacon", d: "Batata com cheddar e bacon.", p: "30,00" }
+        ]},
+        { cat: "Hot Dogs", img: "dog.jpg.png.webp", items: [
+            { id: "19", n: "Mist", d: "Pão de hambúrguer, queijo e presunto.", p: "12,00" },
+            { id: "20", n: "Dog Simples", d: "Salsicha, batata palha e molho.", p: "15,00" },
+            { id: "21", n: "Dog Especial", d: "Salsicha, queijo, presunto e batata.", p: "18,00" },
+            { id: "22", n: "Dog Burguer", d: "Salsicha, carne, queijo e presunto.", p: "20,00" },
+            { id: "23", n: "Dog Bacon", d: "Salsicha, bacon, queijo e presunto.", p: "22,00" },
+            { id: "24", n: "Dog Frango", d: "Salsicha, frango, queijo e presunto.", p: "22,00" },
+            { id: "25", n: "Dog Mix", d: "Bacon, calabresa, frango, salsicha e queijo.", p: "25,00" }
+        ]},
+        { cat: "Tradicionais", img: "tradicional.jpg.jpg.jpg", items: [
+            { id: "26", n: "Hambúrguer", d: "Carne industrial, alface e tomate.", p: "15,00" },
+            { id: "27", n: "American", d: "Ovo, queijo, presunto e salada.", p: "18,00" },
+            { id: "28", n: "Bar", d: "Queijo, presunto e salada.", p: "16,00" },
+            { id: "29", n: "X Salada", d: "Carne industrial, 2 queijos e salada.", p: "18,00" },
+            { id: "30", n: "X Burguer", d: "Carne industrial, queijo e presunto.", p: "18,00" },
+            { id: "31", n: "X Egg Burguer", d: "Ovo, carne, queijo e presunto.", p: "20,00" },
+            { id: "32", n: "X Egg Dog", d: "Salsicha, ovo, carne, queijo e presunto.", p: "22,00" },
+            { id: "33", n: "X Egg Bacon", d: "Bacon, ovo, carne, queijo e presunto.", p: "24,00" },
+            { id: "34", n: "X Frango", d: "Filé de frango, queijo e presunto.", p: "20,00" },
+            { id: "35", n: "X Frango Catupiry", d: "Frango, catupiry, queijo e presunto.", p: "24,00" },
+            { id: "36", n: "Bacon Frango", d: "Bacon, frango, queijo e presunto.", p: "24,00" },
+            { id: "37", n: "Framburguer", d: "Frango, carne, queijo e presunto.", p: "24,00" },
+            { id: "38", n: "Egg Framburguer", d: "Ovo, frango, carne, queijo e presunto.", p: "26,00" },
+            { id: "39", n: "Egg Calaburguer", d: "Ovo, calabresa, carne, queijo e presunto.", p: "26,00" },
+            { id: "40", n: "Calafrango", d: "Calabresa, frango, queijo e presunto.", p: "26,00" },
+            { id: "41", n: "X Calabresa", d: "Calabresa, queijo, presunto e salada.", p: "20,00" },
+            { id: "42", n: "X Bacon", d: "Bacon, carne, queijo e presunto.", p: "22,00" },
+            { id: "43", n: "X Filé", d: "Filé mignon, queijo, presunto e salada.", p: "32,00" },
+            { id: "44", n: "X Filé Acebolado", d: "Filé mignon acebolado, queijo e presunto.", p: "34,00" },
+            { id: "45", n: "X Egg Filé", d: "Ovo, filé mignon, queijo e presunto.", p: "35,00" },
+            { id: "46", n: "Fran Filé", d: "Filé mignon, frango, queijo e presunto.", p: "35,00" },
+            { id: "47", n: "Filé com Bacon", d: "Filé mignon, bacon, queijo e presunto.", p: "35,00" },
+            { id: "48", n: "Calabacon", d: "Calabresa, bacon, queijo e presunto.", p: "28,00" },
+            { id: "49", n: "Double Burguer", d: "2x carne, 2x queijo e salada.", p: "28,00" },
+            { id: "50", n: "Especial", d: "Carne, ovo, bacon, calabresa, queijo e presunto.", p: "32,00" },
+            { id: "51", n: "X Tudo", d: "Carne, ovo, bacon, calabresa, frango, salsicha e salada.", p: "35,00" }
+        ]},
+        { cat: "Refrigerantes", img: "refri.jpg.png.png", items: [
+            { id: "57", n: "Coca 200ml", d: "Garrafa retornável.", p: "3,50" },
+            { id: "58", n: "Coca KS", d: "Garrafa retornável.", p: "5,00" },
+            { id: "59", n: "Coca 2L", d: "Garrafa PET.", p: "14,00" },
+            { id: "60", n: "Refri Lata", d: "Sabores diversos.", p: "6,00" },
+            { id: "61", n: "Coca Lata", d: "350ml gelada.", p: "6,00" },
+            { id: "62", n: "Coca 1L", d: "Garrafa PET.", p: "9,00" },
+            { id: "63", n: "Refri 1L", d: "PET sabores.", p: "8,00" }
+        ]},
+        { cat: "Água & Sucos", img: "agua.jpg.webp.webp", items: [
+            { id: "52", n: "Suco Natural", d: "Laranja ou morango.", p: "10,00", thumb: "sucop.jpg.png.png" },
+            { id: "53", n: "Suco Polpa", d: "Sabores diversos.", p: "8,00", thumb: "sucop.jpg.png.png" },
+            { id: "54", n: "Maromba", d: "Suco de maracujá concentrado.", p: "10,00", thumb: "sucop.jpg.png.png" },
+            { id: "55", n: "Água sem gás", d: "500ml.", p: "3,00" },
+            { id: "56", n: "Água com gás", d: "500ml.", p: "4,00" }
+        ]},
+        { cat: "Cervejas", img: "cerveja1.jpg.png.png", items: [
+            { id: "64", n: "Skol Litrinho", d: "Cerveja gelada.", p: "5,00" },
+            { id: "65", n: "Skol Lata", d: "Lata 350ml.", p: "6,00" },
+            { id: "66", n: "Budweiser LN", d: "Long Neck.", p: "10,00" },
+            { id: "67", n: "Heineken LN", d: "Long Neck.", p: "12,00" },
+            { id: "68", n: "Stella LN", d: "Long Neck.", p: "10,00" },
+            { id: "69", n: "Maionese", d: "Pote artesanal.", p: "3,00", thumb: "maionese.jpg.webp" }
+        ]}
+    ];
+
+    function render() {
+        const root = document.getElementById('menu-target');
+        const nav = document.getElementById('nav-target');
+        menuData.forEach((s, i) => {
+            const l = document.createElement('a'); l.href = `#c-${i}`; l.className = 'nav-link'; l.innerText = s.cat;
+            nav.appendChild(l);
+            const el = document.createElement('section'); el.id = `c-${i}`;
+            el.innerHTML = `<div class="cat-banner" style="background-image: url('${s.img}')"><h2>${s.cat}</h2></div><div class="grid">` + 
+                s.items.map(it => {
+                    const pic = it.thumb ? it.thumb : s.img;
+                    return `<div class="card"><div class="card-top"><div class="item-img" style="background-image: url('${pic}')"></div><div class="item-info"><h3>${it.n}</h3><p>${it.d}</p></div></div><div class="card-bottom"><div class="price">R$ ${it.p}</div><div class="qty-control"><button class="qty-btn" onclick="updateQty('${it.id}', -1)">-</button><span class="qty-num" id="qty-${it.id}">1</span><button class="qty-btn" onclick="updateQty('${it.id}', 1)">+</button></div><button id="btn-${it.id}" class="btn-add" onclick="addToCart('${it.n}', '${it.id}')">ADICIONAR</button></div></div>`
+                }).join('') + `</div>`;
+            root.appendChild(el);
+        });
+    }
+
+    function updateQty(id, change) {
+        const span = document.getElementById(`qty-${id}`);
+        let current = parseInt(span.innerText);
+        let next = current + change;
+        if (next >= 1 && next <= 10) span.innerText = next;
+    }
+
+    function addToCart(n, id) {
+        const qty = parseInt(document.getElementById(`qty-${id}`).innerText);
+        const index = cart.findIndex(x => x.id === id);
+        if (index > -1) { cart[index].qty = qty; } else { cart.push({ n, id, qty }); }
+        document.getElementById('cart-bar').style.display = 'flex';
+        const total = cart.reduce((acc, item) => acc + item.qty, 0);
+        document.getElementById('cart-count').innerText = total;
+        const btn = document.getElementById(`btn-${id}`);
+        btn.innerText = "✓";
+        setTimeout(() => btn.innerText = "ADICIONAR", 800);
+    }
+
+    function sendWhatsApp() {
+        let m = "PEDIDO - AVENIDA BURGUER\n\n";
+        cart.forEach(x => { m += `${x.qty}x ${x.n}\n`; });
+        window.open(`https://wa.me/5574999822095?text=${encodeURIComponent(m + "\nAguardo confirmação.")}`);
+    }
+    render();
+</script>
+</body>
+</html>
